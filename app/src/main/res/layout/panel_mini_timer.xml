@@ -1,30 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
-    <LinearLayout
+    <com.lollipop.ropetimer.view.TimerLinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="1dp"
         android:background="@drawable/bg_mini_timer"
         android:orientation="horizontal"
-        tools:layout_height="32dp"
-        tools:layout_width="160dp" />
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="7dp"
+        app:tll_itemWidth="18dp"
+        app:tll_itemHeight="18dp"
+        app:tll_itemInterval="8dp"
+        app:tll_orientation="horizontal"/>
 
-    <View
+    <com.lollipop.ropetimer.view.LightView
         android:id="@+id/startLightView"
         android:layout_width="2dp"
         android:layout_height="16dp"
         android:layout_gravity="center_vertical|start"
-        tools:background="#f00" />
+        app:color="#f00" />
 
-    <View
+    <com.lollipop.ropetimer.view.LightView
         android:id="@+id/endLightView"
         android:layout_width="2dp"
         android:layout_height="16dp"
         android:layout_gravity="center_vertical|end"
-        tools:background="#f00" />
+        app:color="#f00" />
 
 </FrameLayout>

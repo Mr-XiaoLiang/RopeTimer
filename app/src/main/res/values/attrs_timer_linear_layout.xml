@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="TimerLinearLayout">
+        <attr name="tll_itemWidth" format="dimension" />
+        <attr name="tll_itemHeight" format="dimension" />
+        <attr name="tll_itemInterval" format="dimension" />
+        <attr name="tll_orientation" format="enum">
+            <enum name="horizontal" value="0"/>
+            <enum name="vertical" value="1"/>
+        </attr>
+    </declare-styleable>
+
+</resources>
