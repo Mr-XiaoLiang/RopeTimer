@@ -39,6 +39,29 @@ class FloatingViewHelper private constructor(
             )
         }
 
+        fun bindDrag(
+            holder: View,
+            updateListener: ViewDragHelper.OnLocationUpdateListener
+        ): ViewDragHelper {
+            return ViewDragHelper.bind(holder).onLocationUpdate(updateListener)
+        }
+
+        fun bindDragByWindowManager(holder: View, panel: View = holder): ViewDragHelper {
+            return bindDrag(holder, WindowManagerDragImpl(panel))
+        }
+
+        private fun offsetByWindowManager(panel: View, offsetX: Int, offsetY: Int) {
+            val layoutParams = panel.layoutParams
+            if (layoutParams is WindowManager.LayoutParams) {
+                layoutParams.x += offsetX
+                layoutParams.y += offsetY
+                val parent = panel.parent
+                if (parent is ViewManager) {
+                    parent.updateViewLayout(panel, layoutParams)
+                }
+            }
+        }
+
         fun detach(view: View) {
             val parent = view.parent ?: return
             if (parent is ViewManager) {
@@ -57,15 +80,6 @@ class FloatingViewHelper private constructor(
         windowManager.addView(view, params)
     }
 
-    fun bindDrag(holder: View, panel: View) {
-        ViewDragHelper.bind(holder).onLocationUpdate { _, offsetX, offsetY ->
-            val layoutParams = panel.layoutParams as WindowManager.LayoutParams
-            layoutParams.x += offsetX
-            layoutParams.y += offsetY
-            updateViewLayout(panel, layoutParams)
-        }
-    }
-
     override fun updateViewLayout(view: View, params: ViewGroup.LayoutParams) {
         windowManager.updateViewLayout(view, params)
     }
@@ -75,6 +89,15 @@ class FloatingViewHelper private constructor(
             return
         }
         windowManager.removeView(view)
+    }
+
+    private class WindowManagerDragImpl(
+        private val panel: View
+    ) : ViewDragHelper.OnLocationUpdateListener {
+        override fun onLocationUpdate(view: View, offsetX: Int, offsetY: Int) {
+            offsetByWindowManager(panel, offsetX, offsetY)
+        }
+
     }
 
 }

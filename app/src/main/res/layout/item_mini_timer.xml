@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.lollipop.clip.RoundClipLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="18dp"
+    android:layout_height="18dp"
+    app:clipMaxRound="true">
+
+    <ImageView
+        android:id="@+id/coverView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/cover"
+        tools:src="#f00" />
+
+    <com.lollipop.ropetimer.view.CountdownView
+        android:id="@+id/countdownView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:textColor="@android:color/white"
+        android:textSize="6sp"
+        app:countdownArc="#8F000000"
+        app:countdownMask="#8F000000"
+        app:countdownMax="180"
+        app:countdownValue="120"
+        tools:ignore="SmallSp" />
+
+</com.lollipop.clip.RoundClipLayout>

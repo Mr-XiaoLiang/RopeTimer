@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CountdownView">
+        <attr name="countdownMax" format="integer" />
+        <attr name="countdownValue" format="integer" />
+        <attr name="countdownMask" format="color" />
+        <attr name="countdownArc" format="color" />
+    </declare-styleable>
+</resources>

@@ -2,8 +2,10 @@ package com.lollipop.ropetimer.panel
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.view.ViewManager
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.viewbinding.ViewBinding
 import com.lollipop.ropetimer.TimerPanel
@@ -23,6 +25,7 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
     }
 
     private val timerList = ArrayList<Timer>()
+    private val holderList = ArrayList<Holder>()
 
     private var panelState = PanelState.MINI
 
@@ -33,6 +36,20 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
         val layoutInflater = LayoutInflater.from(context)
         miniTimerPanel = PanelMiniTimerBinding.inflate(layoutInflater)
         fullTimerPanel = PanelFullTimerBinding.inflate(layoutInflater)
+        FloatingViewHelper.bindDragByWindowManager(miniTimerPanel.root)
+        FloatingViewHelper.bindDrag(fullTimerPanel.dragHolder) { _, offX, offY ->
+            fullTimerPanel.timerPanel.offsetLeftAndRight(offX)
+            fullTimerPanel.timerPanel.offsetTopAndBottom(offY)
+        }
+        miniTimerPanel.root.setOnClickListener {
+            switchTo(PanelState.FULL)
+        }
+        fullTimerPanel.root.setOnClickListener {
+            switchTo(PanelState.MINI)
+        }
+        fullTimerPanel.settingButton.setOnClickListener {
+            switchTo(PanelState.SETTING)
+        }
     }
 
     override fun attach(viewManager: ViewManager) {
@@ -41,6 +58,15 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
         attachView(viewManager, fullTimerPanel, MATCH_PARENT, MATCH_PARENT)
         updatePanelVisible()
         startTimer()
+    }
+
+    private fun attachView(
+        viewManager: ViewManager,
+        panel: ViewBinding,
+        width: Int,
+        height: Int
+    ) {
+        viewManager.addView(panel.root, ViewGroup.LayoutParams(width, height))
     }
 
     override fun detach() {
@@ -56,22 +82,21 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
         TODO("Not yet implemented")
     }
 
-    private fun attachView(
-        viewManager: ViewManager,
-        panel: ViewBinding,
-        width: Int,
-        height: Int
-    ) {
-        viewManager.addView(panel.root, ViewGroup.LayoutParams(width, height))
-    }
-
     private fun updateTime() {
         TODO("Not yet implemented")
     }
 
     private fun updatePanelVisible() {
-        miniTimerPanel.root.isVisible = panelState == PanelState.MINI
-        fullTimerPanel.root.isVisible = panelState == PanelState.FULL
+        miniTimerPanel.root.isVisible = panelState.isMini
+        val fullPanel = !panelState.isMini
+        if (fullPanel) {
+            val settingMode = panelState == PanelState.SETTING
+            fullTimerPanel.settingButton.isInvisible = settingMode
+            holderList.forEach {
+                it.settingMode(settingMode)
+            }
+        }
+        fullTimerPanel.root.isVisible = fullPanel
     }
 
     private fun switchTo(state: PanelState) {
@@ -84,9 +109,31 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
         val scale: Scale
     )
 
+    private class Holder(view: View) {
+
+        private var isSettingMode = false
+
+        fun settingMode(isSetting: Boolean) {
+            this.isSettingMode = isSetting
+            updateLayout()
+        }
+
+        private fun updateLayout() {
+            // TODO
+        }
+
+    }
+
     private enum class PanelState {
         MINI,
-        FULL
+        FULL,
+        SETTING;
+
+        val isMini: Boolean
+            get() {
+                return this == MINI
+            }
+
     }
 
 }

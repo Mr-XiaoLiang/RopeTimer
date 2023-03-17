@@ -24,8 +24,8 @@ class ViewDragHelper(private val view: View) : View.OnTouchListener {
         }
     }
 
-    private var dragListener: ((view: View, loc: Point) -> Unit)? = null
-    private var updateLocalListener: ((view: View, offsetX: Int, offsetY: Int) -> Unit)? = null
+    private var dragListener: OnViewDragListener? = null
+    private var updateLocalListener: OnLocationUpdateListener? = null
 
     private val scaledTouchSlop = ViewConfiguration.get(view.context).scaledTouchSlop
     private var downTime = 0L
@@ -106,14 +106,14 @@ class ViewDragHelper(private val view: View) : View.OnTouchListener {
         val moveY = y - lastPoint.y + moveOffset.y
         tempPoint.x = moveX.toInt()
         tempPoint.y = moveY.toInt()
-        dragListener?.invoke(view, tempPoint)
+        dragListener?.onViewDrag(view, tempPoint)
         val realX = tempPoint.x
         val realY = tempPoint.y
         moveOffset.x = moveX - realX
         moveOffset.y = moveY - realY
         lastPoint.x = x
         lastPoint.y = y
-        updateLocalListener?.invoke(view, realX, realY)
+        updateLocalListener?.onLocationUpdate(view, realX, realY)
     }
 
     private fun MotionEvent.activeX(): Float {
@@ -124,14 +124,22 @@ class ViewDragHelper(private val view: View) : View.OnTouchListener {
         return this.rawY
     }
 
-    fun onLocationUpdate(listener: ((view: View, offsetX: Int, offsetY: Int) -> Unit)?): ViewDragHelper {
+    fun onLocationUpdate(listener: OnLocationUpdateListener?): ViewDragHelper {
         updateLocalListener = listener
         return this
     }
 
-    fun onViewDrag(listener: ((view: View, loc: Point) -> Unit)?): ViewDragHelper {
+    fun onViewDrag(listener: OnViewDragListener?): ViewDragHelper {
         dragListener = listener
         return this
+    }
+
+    fun interface OnLocationUpdateListener {
+        fun onLocationUpdate(view: View, offsetX: Int, offsetY: Int)
+    }
+
+    fun interface OnViewDragListener {
+        fun onViewDrag(view: View, loc: Point)
     }
 
 }
