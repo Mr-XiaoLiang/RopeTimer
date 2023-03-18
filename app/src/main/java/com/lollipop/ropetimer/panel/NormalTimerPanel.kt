@@ -2,13 +2,14 @@ package com.lollipop.ropetimer.panel
 
 import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.view.ViewManager
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.viewbinding.ViewBinding
 import com.lollipop.ropetimer.TimerPanel
+import com.lollipop.ropetimer.databinding.ItemFullTimerBinding
+import com.lollipop.ropetimer.databinding.ItemMiniTimerBinding
 import com.lollipop.ropetimer.databinding.PanelFullTimerBinding
 import com.lollipop.ropetimer.databinding.PanelMiniTimerBinding
 import com.lollipop.ropetimer.protocol.Cover
@@ -109,13 +110,41 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
         val scale: Scale
     )
 
-    private class Holder(view: View) {
+    private class Holder(
+        private val miniItem: ItemMiniTimerBinding,
+        private val fullItem: ItemFullTimerBinding
+    ) {
+
+        companion object {
+            fun create(miniGroup: ViewGroup, fillGroup: ViewGroup): Holder {
+                val layoutInflater = LayoutInflater.from(miniGroup.context)
+                return Holder(
+                    ItemMiniTimerBinding.inflate(layoutInflater, miniGroup, true),
+                    ItemFullTimerBinding.inflate(layoutInflater, fillGroup, true),
+                )
+            }
+        }
+
+        private var timer: Timer? = null
 
         private var isSettingMode = false
 
         fun settingMode(isSetting: Boolean) {
             this.isSettingMode = isSetting
             updateLayout()
+        }
+
+        fun updateTimer(timer: Timer) {
+            this.timer = timer
+            onTimerChanged()
+        }
+
+        private fun updateCountdown() {
+            // TODO
+        }
+
+        private fun onTimerChanged() {
+            // TODO
         }
 
         private fun updateLayout() {
