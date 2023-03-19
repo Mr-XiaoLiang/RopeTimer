@@ -129,6 +129,8 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
 
         private var isSettingMode = false
 
+        private var endTime: Long = 0
+
         fun settingMode(isSetting: Boolean) {
             this.isSettingMode = isSetting
             updateLayout()
@@ -139,16 +141,37 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
             onTimerChanged()
         }
 
+        private fun endTimeChanged(duration: Int) {
+            val ms = duration * 1000L
+            endTime = now() + ms
+        }
+
         private fun updateCountdown() {
-            // TODO
+            val t = timer
+            if (t == null) {
+                miniItem.countdownView.isVisible = false
+                fullItem.countdownView.isVisible = false
+                return
+            }
+            val max = t.scale.max
+            val value = ((endTime - now()) / 1000).toInt()
+            miniItem.countdownView.setValue(max, value)
+            fullItem.countdownView.setValue(max, value)
         }
 
         private fun onTimerChanged() {
-            // TODO
+            timer?.cover?.load(miniItem.coverView)
+            timer?.cover?.load(fullItem.coverView)
+            updateCountdown()
         }
 
         private fun updateLayout() {
             // TODO
+            updateCountdown()
+        }
+
+        private fun now(): Long {
+            return System.currentTimeMillis()
         }
 
     }
