@@ -26,6 +26,8 @@ class ViewDragHelper(private val view: View) : View.OnTouchListener {
 
     private var dragListener: OnViewDragListener? = null
     private var updateLocalListener: OnLocationUpdateListener? = null
+    private var onDragTouchUpListener: OnDragTouchUpListener? = null
+    private var onDragTouchDownListener: OnDragTouchDownListener? = null
 
     private val scaledTouchSlop = ViewConfiguration.get(view.context).scaledTouchSlop
     private var downTime = 0L
@@ -59,6 +61,7 @@ class ViewDragHelper(private val view: View) : View.OnTouchListener {
                 startDrag = false
                 // 事件是否取消？
                 dragCancel = false
+                onDragTouchDownListener?.onDragTouchDown()
             }
             MotionEvent.ACTION_MOVE -> {
                 if (dragCancel) {
@@ -71,9 +74,12 @@ class ViewDragHelper(private val view: View) : View.OnTouchListener {
                     return false
                 }
                 val now = SystemClock.uptimeMillis()
+                var performedClick = false
                 if (allowClick && now - downTime <= SINGLE_TAP_TIME) {
+                    performedClick = true
                     view.performClick()
                 }
+                onDragTouchUpListener?.onDragTouchUp(performedClick)
             }
             MotionEvent.ACTION_POINTER_DOWN, MotionEvent.ACTION_CANCEL -> {
                 dragCancel = true
@@ -129,6 +135,16 @@ class ViewDragHelper(private val view: View) : View.OnTouchListener {
         return this
     }
 
+    fun onDragTouchUp(listener: OnDragTouchUpListener?): ViewDragHelper {
+        onDragTouchUpListener = listener
+        return this
+    }
+
+    fun onDragTouchDown(listener: OnDragTouchDownListener?): ViewDragHelper {
+        onDragTouchDownListener = listener
+        return this
+    }
+
     fun onViewDrag(listener: OnViewDragListener?): ViewDragHelper {
         dragListener = listener
         return this
@@ -140,6 +156,14 @@ class ViewDragHelper(private val view: View) : View.OnTouchListener {
 
     fun interface OnViewDragListener {
         fun onViewDrag(view: View, loc: Point)
+    }
+
+    fun interface OnDragTouchUpListener {
+        fun onDragTouchUp(performedClick: Boolean)
+    }
+
+    fun interface OnDragTouchDownListener {
+        fun onDragTouchDown()
     }
 
 }

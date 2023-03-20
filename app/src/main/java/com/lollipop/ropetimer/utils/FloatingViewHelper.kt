@@ -39,15 +39,8 @@ class FloatingViewHelper private constructor(
             )
         }
 
-        fun bindDrag(
-            holder: View,
-            updateListener: ViewDragHelper.OnLocationUpdateListener
-        ): ViewDragHelper {
-            return ViewDragHelper.bind(holder).onLocationUpdate(updateListener)
-        }
-
-        fun bindDragByWindowManager(holder: View, panel: View = holder): ViewDragHelper {
-            return bindDrag(holder, WindowManagerDragImpl(panel))
+        fun bindDrag(holder: View, panel: View = holder): ViewDragHelper {
+            return ViewDragHelper.bind(holder).onLocationUpdate(WindowManagerDragImpl(panel))
         }
 
         private fun offsetByWindowManager(panel: View, offsetX: Int, offsetY: Int) {

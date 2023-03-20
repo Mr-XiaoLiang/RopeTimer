@@ -2,6 +2,7 @@ package com.lollipop.ropetimer.panel
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.view.ViewManager
 import androidx.core.view.isInvisible
@@ -16,6 +17,7 @@ import com.lollipop.ropetimer.protocol.Cover
 import com.lollipop.ropetimer.protocol.NormalProtocol
 import com.lollipop.ropetimer.protocol.Scale
 import com.lollipop.ropetimer.utils.FloatingViewHelper
+import com.lollipop.ropetimer.utils.ViewDragHelper
 
 open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
     TimerPanel<NormalProtocol>(context, protocol) {
@@ -37,8 +39,8 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
         val layoutInflater = LayoutInflater.from(context)
         miniTimerPanel = PanelMiniTimerBinding.inflate(layoutInflater)
         fullTimerPanel = PanelFullTimerBinding.inflate(layoutInflater)
-        FloatingViewHelper.bindDragByWindowManager(miniTimerPanel.root)
-        FloatingViewHelper.bindDrag(fullTimerPanel.dragHolder) { _, offX, offY ->
+        FloatingViewHelper.bindDrag(miniTimerPanel.root)
+        ViewDragHelper.bind(fullTimerPanel.dragHolder).onLocationUpdate { _, offX, offY ->
             fullTimerPanel.timerPanel.offsetLeftAndRight(offX)
             fullTimerPanel.timerPanel.offsetTopAndBottom(offY)
         }
@@ -113,7 +115,7 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
     private class Holder(
         private val miniItem: ItemMiniTimerBinding,
         private val fullItem: ItemFullTimerBinding
-    ) {
+    ) : ViewDragHelper.OnLocationUpdateListener, ViewDragHelper.OnDragTouchUpListener {
 
         companion object {
             fun create(miniGroup: ViewGroup, fillGroup: ViewGroup): Holder {
@@ -130,6 +132,12 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
         private var isSettingMode = false
 
         private var endTime: Long = 0
+
+        init {
+            ViewDragHelper.bind(fullItem.countdownHolderView)
+                .onLocationUpdate(this)
+                .onDragTouchUp(this)
+        }
 
         fun settingMode(isSetting: Boolean) {
             this.isSettingMode = isSetting
@@ -172,6 +180,19 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
 
         private fun now(): Long {
             return System.currentTimeMillis()
+        }
+
+        override fun onLocationUpdate(view: View, offsetX: Int, offsetY: Int) {
+            fullItem.countdownHolderView.offsetTopAndBottom(offsetY)
+            // 需要展示悬浮的数字
+        }
+
+        override fun onDragTouchUp(performedClick: Boolean) {
+            if (performedClick) {
+                return
+            }
+            // 需要滚回顶部，并且开始计时
+            TODO("Not yet implemented")
         }
 
     }
