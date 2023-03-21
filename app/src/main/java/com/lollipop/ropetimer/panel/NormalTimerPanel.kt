@@ -2,20 +2,18 @@ package com.lollipop.ropetimer.panel
 
 import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.view.ViewManager
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.viewbinding.ViewBinding
 import com.lollipop.ropetimer.TimerPanel
-import com.lollipop.ropetimer.databinding.ItemFullTimerBinding
-import com.lollipop.ropetimer.databinding.ItemMiniTimerBinding
 import com.lollipop.ropetimer.databinding.PanelFullTimerBinding
 import com.lollipop.ropetimer.databinding.PanelMiniTimerBinding
-import com.lollipop.ropetimer.protocol.Cover
+import com.lollipop.ropetimer.panel.normal.NormalPanelState
+import com.lollipop.ropetimer.panel.normal.NormalTimer
+import com.lollipop.ropetimer.panel.normal.NormalTimerHolder
 import com.lollipop.ropetimer.protocol.NormalProtocol
-import com.lollipop.ropetimer.protocol.Scale
 import com.lollipop.ropetimer.utils.FloatingViewHelper
 import com.lollipop.ropetimer.utils.ViewDragHelper
 
@@ -27,10 +25,10 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
         private const val MATCH_PARENT = ViewGroup.LayoutParams.MATCH_PARENT
     }
 
-    private val timerList = ArrayList<Timer>()
-    private val holderList = ArrayList<Holder>()
+    private val timerList = ArrayList<NormalTimer>()
+    private val holderList = ArrayList<NormalTimerHolder>()
 
-    private var panelState = PanelState.MINI
+    private var panelState = NormalPanelState.MINI
 
     private val miniTimerPanel: PanelMiniTimerBinding
     private val fullTimerPanel: PanelFullTimerBinding
@@ -45,13 +43,13 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
             fullTimerPanel.timerPanel.offsetTopAndBottom(offY)
         }
         miniTimerPanel.root.setOnClickListener {
-            switchTo(PanelState.FULL)
+            switchTo(NormalPanelState.FULL)
         }
         fullTimerPanel.root.setOnClickListener {
-            switchTo(PanelState.MINI)
+            switchTo(NormalPanelState.MINI)
         }
         fullTimerPanel.settingButton.setOnClickListener {
-            switchTo(PanelState.SETTING)
+            switchTo(NormalPanelState.SETTING)
         }
     }
 
@@ -93,7 +91,7 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
         miniTimerPanel.root.isVisible = panelState.isMini
         val fullPanel = !panelState.isMini
         if (fullPanel) {
-            val settingMode = panelState == PanelState.SETTING
+            val settingMode = panelState.isSetting
             fullTimerPanel.settingButton.isInvisible = settingMode
             holderList.forEach {
                 it.settingMode(settingMode)
@@ -102,111 +100,9 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
         fullTimerPanel.root.isVisible = fullPanel
     }
 
-    private fun switchTo(state: PanelState) {
+    private fun switchTo(state: NormalPanelState) {
         panelState = state
         updatePanelVisible()
-    }
-
-    private class Timer(
-        val cover: Cover,
-        val scale: Scale
-    )
-
-    private class Holder(
-        private val miniItem: ItemMiniTimerBinding,
-        private val fullItem: ItemFullTimerBinding
-    ) : ViewDragHelper.OnLocationUpdateListener, ViewDragHelper.OnDragTouchUpListener {
-
-        companion object {
-            fun create(miniGroup: ViewGroup, fillGroup: ViewGroup): Holder {
-                val layoutInflater = LayoutInflater.from(miniGroup.context)
-                return Holder(
-                    ItemMiniTimerBinding.inflate(layoutInflater, miniGroup, true),
-                    ItemFullTimerBinding.inflate(layoutInflater, fillGroup, true),
-                )
-            }
-        }
-
-        private var timer: Timer? = null
-
-        private var isSettingMode = false
-
-        private var endTime: Long = 0
-
-        init {
-            ViewDragHelper.bind(fullItem.countdownHolderView)
-                .onLocationUpdate(this)
-                .onDragTouchUp(this)
-        }
-
-        fun settingMode(isSetting: Boolean) {
-            this.isSettingMode = isSetting
-            updateLayout()
-        }
-
-        fun updateTimer(timer: Timer) {
-            this.timer = timer
-            onTimerChanged()
-        }
-
-        private fun endTimeChanged(duration: Int) {
-            val ms = duration * 1000L
-            endTime = now() + ms
-        }
-
-        private fun updateCountdown() {
-            val t = timer
-            if (t == null) {
-                miniItem.countdownView.isVisible = false
-                fullItem.countdownView.isVisible = false
-                return
-            }
-            val max = t.scale.max
-            val value = ((endTime - now()) / 1000).toInt()
-            miniItem.countdownView.setValue(max, value)
-            fullItem.countdownView.setValue(max, value)
-        }
-
-        private fun onTimerChanged() {
-            timer?.cover?.load(miniItem.coverView)
-            timer?.cover?.load(fullItem.coverView)
-            updateCountdown()
-        }
-
-        private fun updateLayout() {
-            // TODO
-            updateCountdown()
-        }
-
-        private fun now(): Long {
-            return System.currentTimeMillis()
-        }
-
-        override fun onLocationUpdate(view: View, offsetX: Int, offsetY: Int) {
-            fullItem.countdownHolderView.offsetTopAndBottom(offsetY)
-            // 需要展示悬浮的数字
-        }
-
-        override fun onDragTouchUp(performedClick: Boolean) {
-            if (performedClick) {
-                return
-            }
-            // 需要滚回顶部，并且开始计时
-            TODO("Not yet implemented")
-        }
-
-    }
-
-    private enum class PanelState {
-        MINI,
-        FULL,
-        SETTING;
-
-        val isMini: Boolean
-            get() {
-                return this == MINI
-            }
-
     }
 
 }

@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.*
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
-import androidx.core.view.isVisible
 import com.lollipop.ropetimer.R
 import kotlin.math.max
 import kotlin.math.min
@@ -69,10 +68,11 @@ class CountdownView @JvmOverloads constructor(
 
     private fun changeProgress() {
         if (currentValue <= 0) {
-            isVisible = false
+            countdownDrawable.isShown = false
+            invalidate()
             return
         }
-        isVisible = true
+        countdownDrawable.isShown = true
         countdownDrawable.process = currentValue * 1F / maxValue
         text = displayCallback.getValue(maxValue, currentValue)
         invalidate()
@@ -108,6 +108,8 @@ class CountdownView @JvmOverloads constructor(
 
         private val boundsF = RectF()
 
+        var isShown = true
+
         override fun onBoundsChange(bounds: Rect) {
             super.onBoundsChange(bounds)
             boundsF.set(bounds)
@@ -115,6 +117,9 @@ class CountdownView @JvmOverloads constructor(
         }
 
         override fun draw(canvas: Canvas) {
+            if (!isShown) {
+                return
+            }
             bindPaintColor(maskColor)
             canvas.drawRect(boundsF, paint)
             bindPaintColor(progressColor)
