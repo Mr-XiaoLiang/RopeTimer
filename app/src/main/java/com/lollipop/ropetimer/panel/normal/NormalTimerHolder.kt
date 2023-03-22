@@ -1,5 +1,6 @@
 package com.lollipop.ropetimer.panel.normal
 
+import android.animation.ValueAnimator
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +14,8 @@ class NormalTimerHolder(
     private val fullItem: ItemFullTimerBinding
 ) : ViewDragHelper.OnLocationUpdateListener,
     ViewDragHelper.OnDragTouchUpListener,
-    ViewDragHelper.OnDragTouchDownListener {
+    ViewDragHelper.OnDragTouchDownListener,
+    ValueAnimator.AnimatorUpdateListener {
 
     companion object {
         fun create(miniGroup: ViewGroup, fillGroup: ViewGroup): NormalTimerHolder {
@@ -23,6 +25,8 @@ class NormalTimerHolder(
                 ItemFullTimerBinding.inflate(layoutInflater, fillGroup, true),
             )
         }
+
+        private const val FLY_UP_DURATION = 300L
     }
 
     private var timer: NormalTimer? = null
@@ -30,6 +34,12 @@ class NormalTimerHolder(
     private var isSettingMode = false
 
     private var endTime: Long = 0
+
+    private val animator by lazy {
+        ValueAnimator().apply {
+            addUpdateListener(this@NormalTimerHolder)
+        }
+    }
 
     init {
         ViewDragHelper.bind(fullItem.countdownHolderView)
@@ -98,12 +108,52 @@ class NormalTimerHolder(
             return
         }
         // 需要滚回顶部，并且开始计时
+        val offsetY = getItemOffsetY(fullItem.root, fullItem.countdownHolderView)
+        val countdownValue = getCountdownHolderValue(offsetY)
+        endTimeChanged(countdownValue)
+        animator.cancel()
+        animator.duration = (FLY_UP_DURATION * offsetY).toLong()
+        animator.setFloatValues(offsetY, 0F)
+        animator.start()
+    }
 
-        TODO("Not yet implemented")
+    private fun getCountdownHolderValue(float: Float): Int {
+        return (float * (timer?.scale?.max ?: 120)).toInt()
+    }
+
+    /**
+     * Y轴偏移量的权重
+     * [0, 1]
+     */
+    private fun getItemOffsetY(group: ViewGroup, item: View): Float {
+        val itemTop = item.top - group.paddingTop
+        val groupHeight = group.height - group.paddingTop - group.paddingBottom
+        val itemHeight = item.height
+        return itemTop * 1F / (groupHeight - itemHeight)
     }
 
     override fun onDragTouchDown() {
-        TODO("Not yet implemented")
+        animator.cancel()
+    }
+
+    override fun onAnimationUpdate(animation: ValueAnimator) {
+        if (animation === animator) {
+            val progress = animation.animatedValue
+            if (progress is Float) {
+                updateHolderByAnimation(progress)
+            }
+        }
+    }
+
+    private fun updateHolderByAnimation(progress: Float) {
+        val group = fullItem.root
+        val holder = fullItem.countdownHolderView
+        val groupHeight = group.height - group.paddingTop - group.paddingBottom - holder.height
+        val top = (groupHeight * progress) + group.paddingTop
+        val offsetY = (top - holder.top).toInt()
+        if (offsetY != 0) {
+            holder.offsetTopAndBottom(offsetY)
+        }
     }
 
 }
