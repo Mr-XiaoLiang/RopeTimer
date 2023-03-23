@@ -62,7 +62,7 @@ class NormalTimerHolder(
         endTime = now() + ms
     }
 
-    private fun updateCountdown() {
+    fun updateCountdown() {
         val t = timer
         if (t == null) {
             miniItem.countdownView.isVisible = false

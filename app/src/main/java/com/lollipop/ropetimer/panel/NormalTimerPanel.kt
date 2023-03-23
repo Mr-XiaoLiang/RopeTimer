@@ -1,6 +1,8 @@
 package com.lollipop.ropetimer.panel
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.ViewManager
@@ -32,6 +34,14 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
 
     private val miniTimerPanel: PanelMiniTimerBinding
     private val fullTimerPanel: PanelFullTimerBinding
+
+    private val timerHandler by lazy {
+        Handler(Looper.getMainLooper())
+    }
+
+    private val updateTask = Runnable {
+        updateTime()
+    }
 
     init {
         val layoutInflater = LayoutInflater.from(context)
@@ -71,23 +81,31 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
     }
 
     override fun detach() {
+        stopTimer()
         FloatingViewHelper.detach(miniTimerPanel)
         FloatingViewHelper.detach(fullTimerPanel)
     }
 
     private fun startTimer() {
-        TODO("Not yet implemented")
+        timerHandler.removeCallbacks(updateTask)
+        timerHandler.post(updateTask)
     }
 
     private fun stopTimer() {
-        TODO("Not yet implemented")
+        timerHandler.removeCallbacks(updateTask)
     }
 
     private fun updateTime() {
-        TODO("Not yet implemented")
+        holderList.forEach {
+            it.updateCountdown()
+        }
+        timerHandler.postDelayed(updateTask, 250L)
     }
 
     private fun updatePanelVisible() {
+        for (index in holderList.indices) {
+            holderList[index].updateTimer(timerList[index])
+        }
         miniTimerPanel.root.isVisible = panelState.isMini
         val fullPanel = !panelState.isMini
         if (fullPanel) {
@@ -98,6 +116,10 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
             }
         }
         fullTimerPanel.root.isVisible = fullPanel
+    }
+
+    private fun addHolder() {
+        // TODO
     }
 
     private fun switchTo(state: NormalPanelState) {
