@@ -19,6 +19,7 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <com.lollipop.ropetimer.view.LightView
+                android:id="@+id/settingButtonBackground"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:color="#f00" />
@@ -29,6 +30,54 @@
                 android:layout_gravity="center"
                 android:padding="4dp"
                 android:src="@drawable/ic_baseline_settings_24"
+                app:tint="@android:color/white" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/addButton"
+            android:layout_width="48dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center_horizontal"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="20dp"
+            app:layout_constraintStart_toEndOf="@id/settingButton">
+
+            <com.lollipop.ropetimer.view.LightView
+                android:id="@+id/addButtonBackground"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:color="#f00" />
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:padding="4dp"
+                android:src="@drawable/ic_baseline_add_24"
+                app:tint="@android:color/white" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/doneButton"
+            android:layout_width="48dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center_horizontal"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintEnd_toStartOf="@id/settingButton">
+
+            <com.lollipop.ropetimer.view.LightView
+                android:id="@+id/doneButtonBackground"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:color="#f00" />
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:padding="4dp"
+                android:src="@drawable/ic_baseline_add_24"
                 app:tint="@android:color/white" />
         </FrameLayout>
 
@@ -51,6 +100,7 @@
             app:tll_orientation="horizontal" />
 
         <com.lollipop.ropetimer.view.LightView
+            android:id="@+id/touchLightView"
             android:layout_width="48dp"
             android:layout_height="4dp"
             android:layout_gravity="center_horizontal"

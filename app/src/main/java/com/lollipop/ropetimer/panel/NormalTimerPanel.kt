@@ -47,6 +47,11 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
         val layoutInflater = LayoutInflater.from(context)
         miniTimerPanel = PanelMiniTimerBinding.inflate(layoutInflater)
         fullTimerPanel = PanelFullTimerBinding.inflate(layoutInflater)
+        bindListener()
+        bindTheme()
+    }
+
+    private fun bindListener() {
         FloatingViewHelper.bindDrag(miniTimerPanel.root)
         ViewDragHelper.bind(fullTimerPanel.dragHolder).onLocationUpdate { _, offX, offY ->
             fullTimerPanel.timerPanel.offsetLeftAndRight(offX)
@@ -61,6 +66,16 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
         fullTimerPanel.settingButton.setOnClickListener {
             switchTo(NormalPanelState.SETTING)
         }
+    }
+
+    private fun bindTheme() {
+        val theme = protocol.themeColor
+        miniTimerPanel.endLightView.color = theme
+        miniTimerPanel.startLightView.color = theme
+        fullTimerPanel.settingButtonBackground.color = theme
+        fullTimerPanel.touchLightView.color = theme
+        fullTimerPanel.addButtonBackground.color = theme
+        fullTimerPanel.doneButtonBackground.color = theme
     }
 
     override fun attach(viewManager: ViewManager) {
@@ -106,6 +121,9 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
         for (index in holderList.indices) {
             holderList[index].updateTimer(timerList[index])
         }
+        fullTimerPanel.settingButton.isInvisible = panelState.isSetting
+        fullTimerPanel.addButton.isInvisible = !panelState.isSetting
+        fullTimerPanel.doneButton.isInvisible = !panelState.isSetting
         miniTimerPanel.root.isVisible = panelState.isMini
         val fullPanel = !panelState.isMini
         if (fullPanel) {
