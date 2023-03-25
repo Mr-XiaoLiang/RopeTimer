@@ -3,7 +3,8 @@ package com.lollipop.ropetimer.panel.normal
 enum class NormalPanelState {
     MINI,
     FULL,
-    SETTING;
+    SETTING,
+    EDIT;
 
     val isMini: Boolean
         get() {
@@ -13,5 +14,10 @@ enum class NormalPanelState {
     val isSetting: Boolean
         get() {
             return this == SETTING
+        }
+
+    val isEdit: Boolean
+        get() {
+            return this == EDIT
         }
 }

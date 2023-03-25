@@ -66,6 +66,12 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
         fullTimerPanel.settingButton.setOnClickListener {
             switchTo(NormalPanelState.SETTING)
         }
+        fullTimerPanel.doneButton.setOnClickListener {
+            switchTo(NormalPanelState.FULL)
+        }
+        fullTimerPanel.addButton.setOnClickListener {
+            switchTo(NormalPanelState.EDIT)
+        }
     }
 
     private fun bindTheme() {
@@ -122,18 +128,18 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
             holderList[index].updateTimer(timerList[index])
         }
         fullTimerPanel.settingButton.isInvisible = panelState.isSetting
-        fullTimerPanel.addButton.isInvisible = !panelState.isSetting
-        fullTimerPanel.doneButton.isInvisible = !panelState.isSetting
+        fullTimerPanel.addButton.isInvisible = panelState.isEdit
+        fullTimerPanel.doneButton.isInvisible = panelState.isEdit
         miniTimerPanel.root.isVisible = panelState.isMini
         val fullPanel = !panelState.isMini
         if (fullPanel) {
             val settingMode = panelState.isSetting
-            fullTimerPanel.settingButton.isInvisible = settingMode
             holderList.forEach {
                 it.settingMode(settingMode)
             }
         }
         fullTimerPanel.root.isVisible = fullPanel
+        // TODO 添加计时器的面板还没做
     }
 
     private fun addHolder() {
