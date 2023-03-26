@@ -75,13 +75,16 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
     }
 
     private fun bindTheme() {
-        val theme = protocol.themeColor
-        miniTimerPanel.endLightView.color = theme
-        miniTimerPanel.startLightView.color = theme
-        fullTimerPanel.settingButtonBackground.color = theme
-        fullTimerPanel.touchLightView.color = theme
-        fullTimerPanel.addButtonBackground.color = theme
-        fullTimerPanel.doneButtonBackground.color = theme
+        updateTheme(
+            protocol.themeColor,
+            miniTimerPanel.endLightView,
+            miniTimerPanel.startLightView,
+            fullTimerPanel.settingButtonBackground,
+            fullTimerPanel.touchLightView,
+            fullTimerPanel.addButtonBackground,
+            fullTimerPanel.doneButtonBackground,
+            fullTimerPanel.createButtonBackground,
+        )
     }
 
     override fun attach(viewManager: ViewManager) {
@@ -133,13 +136,19 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
         miniTimerPanel.root.isVisible = panelState.isMini
         val fullPanel = !panelState.isMini
         if (fullPanel) {
-            val settingMode = panelState.isSetting
-            holderList.forEach {
-                it.settingMode(settingMode)
+            if (panelState.isEdit) {
+                fullTimerPanel.createTimerPanel.isVisible = true
+                fullTimerPanel.timerGroup.isVisible = false
+            } else {
+                fullTimerPanel.createTimerPanel.isVisible = false
+                fullTimerPanel.timerGroup.isVisible = true
+                val settingMode = panelState.isSetting
+                holderList.forEach {
+                    it.settingMode(settingMode)
+                }
             }
         }
         fullTimerPanel.root.isVisible = fullPanel
-        // TODO 添加计时器的面板还没做
     }
 
     private fun addHolder() {
