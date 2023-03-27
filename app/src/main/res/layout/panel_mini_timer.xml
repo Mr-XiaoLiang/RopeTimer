@@ -6,6 +6,7 @@
     android:layout_height="wrap_content">
 
     <com.lollipop.ropetimer.view.TimerLinearLayout
+        android:id="@+id/timerGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="1dp"

@@ -14,6 +14,7 @@ import com.lollipop.ropetimer.databinding.PanelFullTimerBinding
 import com.lollipop.ropetimer.databinding.PanelMiniTimerBinding
 import com.lollipop.ropetimer.panel.normal.NormalPanelState
 import com.lollipop.ropetimer.panel.normal.NormalTimer
+import com.lollipop.ropetimer.panel.normal.NormalTimerCreator
 import com.lollipop.ropetimer.panel.normal.NormalTimerHolder
 import com.lollipop.ropetimer.protocol.NormalProtocol
 import com.lollipop.ropetimer.utils.FloatingViewHelper
@@ -35,6 +36,8 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
     private val miniTimerPanel: PanelMiniTimerBinding
     private val fullTimerPanel: PanelFullTimerBinding
 
+    private val timerCreator: NormalTimerCreator
+
     private val timerHandler by lazy {
         Handler(Looper.getMainLooper())
     }
@@ -47,6 +50,11 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
         val layoutInflater = LayoutInflater.from(context)
         miniTimerPanel = PanelMiniTimerBinding.inflate(layoutInflater)
         fullTimerPanel = PanelFullTimerBinding.inflate(layoutInflater)
+        timerCreator = NormalTimerCreator(
+            protocol,
+            fullTimerPanel.coverSelectView,
+            fullTimerPanel.timeSelectView
+        )
         bindListener()
         bindTheme()
     }
@@ -71,6 +79,10 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
         }
         fullTimerPanel.addButton.setOnClickListener {
             switchTo(NormalPanelState.EDIT)
+        }
+        fullTimerPanel.createButton.setOnClickListener {
+            addHolder()
+            switchTo(NormalPanelState.SETTING)
         }
     }
 
@@ -152,7 +164,19 @@ open class NormalTimerPanel(context: Context, protocol: NormalProtocol) :
     }
 
     private fun addHolder() {
-        // TODO
+        val cover = timerCreator.currentCover()
+        val scale = timerCreator.currentScale()
+        addHolder(NormalTimer(cover, scale))
+    }
+
+    private fun addHolder(timer: NormalTimer) {
+        timerList.add(timer)
+        holderList.add(
+            NormalTimerHolder.create(
+                miniTimerPanel.timerGroup,
+                fullTimerPanel.timerGroup
+            )
+        )
     }
 
     private fun switchTo(state: NormalPanelState) {
