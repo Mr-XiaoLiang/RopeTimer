@@ -1,7 +1,11 @@
 package com.lollipop.clip
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.Shader
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.widget.FrameLayout
@@ -25,6 +29,12 @@ class RoundClipLayout(
             setStyle(Paint.Style.STROKE)
         }
     }
+
+    var isStrokeVisible: Boolean = true
+        set(value) {
+            field = value
+            invalidate()
+        }
 
     var maxRound = false
         set(value) {
@@ -210,9 +220,7 @@ class RoundClipLayout(
         canvas.clipPath(clipPath)
         super.draw(canvas)
         canvas.restoreToCount(saveCount)
-        if (strokeWidth > 0) {
-            canvas.drawPath(clipPath, strokePaint)
-        }
+        drawStroke(canvas)
     }
 
     override fun dispatchDraw(canvas: Canvas) {
@@ -224,9 +232,16 @@ class RoundClipLayout(
         canvas.clipPath(clipPath)
         super.dispatchDraw(canvas)
         canvas.restoreToCount(saveCount)
-        if (strokeWidth > 0) {
-            canvas.drawPath(clipPath, strokePaint)
+        drawStroke(canvas)
+    }
+
+    private fun drawStroke(canvas: Canvas) {
+        if (isStrokeVisible) {
+            if (strokeWidth > 0) {
+                canvas.drawPath(clipPath, strokePaint)
+            }
         }
     }
+
 
 }

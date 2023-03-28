@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.lollipop.clip.RoundClipLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    app:clipStrokeWidth="1dp"
+    app:clipMaxRound="true">
+
+    <ImageView
+        android:id="@+id/coverView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/cover"
+        tools:src="#f00" />
+
+</com.lollipop.clip.RoundClipLayout>

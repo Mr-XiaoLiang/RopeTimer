@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.lollipop.clip.RoundClipLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="48dp"
+    app:clipMaxRound="true"
+    app:clipStrokeWidth="1dp">
+
+    <TextView
+        android:id="@+id/scaleView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#676767"
+        android:contentDescription="@string/cover"
+        android:gravity="center"
+        android:paddingHorizontal="20dp"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        tools:text="@string/app_name" />
+
+</com.lollipop.clip.RoundClipLayout>

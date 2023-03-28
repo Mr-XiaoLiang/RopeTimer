@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">RopeTimer</string>
     <string name="cover">Cover</string>
+    <string name="scale">%1$dS</string>
 </resources>
