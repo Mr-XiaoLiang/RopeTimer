@@ -1,6 +1,8 @@
 package com.lollipop.ropetimer.panel.normal
 
 import android.animation.ValueAnimator
+import android.graphics.Color
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -41,10 +43,31 @@ class NormalTimerHolder(
         }
     }
 
+    private val floatingTimeValueDrawable = FloatingTimeValueDrawable()
+
     init {
         ViewDragHelper.bind(fullItem.countdownHolderView)
             .onLocationUpdate(this)
             .onDragTouchUp(this)
+            .onDragTouchDown(this)
+        floatingTimeValueDrawable.updateAnchorView(fullItem.root)
+        floatingTimeValueDrawable.fontColor = Color.GRAY
+        floatingTimeValueDrawable.popupColor = Color.WHITE
+        floatingTimeValueDrawable.fontSize = getPixelSize(14F)
+        floatingTimeValueDrawable.margin = getPixelSize(10F)
+        floatingTimeValueDrawable.paddingHorizontal = getPixelSize(16F)
+        floatingTimeValueDrawable.paddingVertical = getPixelSize(8F)
+        floatingTimeValueDrawable.popupMinHeight = getPixelSize(32F)
+        floatingTimeValueDrawable.popupMinWidth = getPixelSize(48F)
+
+    }
+
+    private fun getPixelSize(dp: Float): Float {
+        return TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            dp,
+            fullItem.root.resources.displayMetrics
+        )
     }
 
     fun settingMode(isSetting: Boolean) {
@@ -101,9 +124,17 @@ class NormalTimerHolder(
     override fun onLocationUpdate(view: View, offsetX: Int, offsetY: Int) {
         fullItem.countdownHolderView.offsetTopAndBottom(offsetY)
         // 需要展示悬浮的数字
+        floatingTimeValueDrawable.textValue = getCountdownHolderValue(
+            getItemOffsetY(fullItem.root, fullItem.countdownHolderView)
+        ).toString()
+        floatingTimeValueDrawable.anchorYWeight = getItemOffsetYCenter(
+            fullItem.root,
+            fullItem.countdownHolderView
+        )
     }
 
     override fun onDragTouchUp(performedClick: Boolean) {
+        floatingTimeValueDrawable.detachFromOverlay()
         if (performedClick) {
             return
         }
@@ -132,8 +163,18 @@ class NormalTimerHolder(
         return itemTop * 1F / (groupHeight - itemHeight)
     }
 
+    /**
+     * Item的中心点相对于Group本身的高度而言的位置
+     */
+    private fun getItemOffsetYCenter(group: ViewGroup, item: View): Float {
+        return ((item.top + item.bottom) * 0.5F) / group.height
+    }
+
     override fun onDragTouchDown() {
         animator.cancel()
+        floatingTimeValueDrawable.attachToOverlay()
+        val layout = fullItem.root
+        floatingTimeValueDrawable.setOverlayBounds(0, 0, layout.width, layout.height)
     }
 
     override fun onAnimationUpdate(animation: ValueAnimator) {

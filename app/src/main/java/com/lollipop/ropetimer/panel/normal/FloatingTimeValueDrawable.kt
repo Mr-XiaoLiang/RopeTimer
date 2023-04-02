@@ -10,7 +10,6 @@ import androidx.annotation.ColorInt
 import com.lollipop.viewoverlay.OverlayDrawable
 import kotlin.math.min
 
-
 class FloatingTimeValueDrawable : OverlayDrawable() {
 
     private val paint = Paint().apply {
