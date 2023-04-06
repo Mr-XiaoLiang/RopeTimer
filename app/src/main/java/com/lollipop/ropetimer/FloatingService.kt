@@ -25,6 +25,7 @@ class FloatingService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         // addNewPanel()
+        updateNotification()
         return START_STICKY_COMPATIBILITY
     }
 
@@ -46,6 +47,10 @@ class FloatingService : Service() {
                     .setVibrationEnabled(false)
                     .build()
             )
+    }
+
+    private fun updateNotification() {
+        // TODO
     }
 
 }
