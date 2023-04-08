@@ -3,4 +3,8 @@
     <string name="cover">Cover</string>
     <string name="scale">%1$dS</string>
     <string name="floating_channel_name">持续运行前台服务</string>
+    <string name="label_post_notifications">发送通知</string>
+    <string name="description_post_notifications">保持服务运行与通知栏快速操作</string>
+    <string name="label_floating_window">悬浮窗口</string>
+    <string name="description_floating_window">在其他应用上显示窗口</string>
 </resources>
