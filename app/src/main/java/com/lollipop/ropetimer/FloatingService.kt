@@ -10,13 +10,16 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.lollipop.ropetimer.utils.Permission
 
 class FloatingService : Service() {
 
     companion object {
         private const val FLOATING_CHANNEL_ID = "Floating"
         private const val FLOATING_NOTIFICATION_ID = 2333
+
+        var isRunning: Boolean = false
+            private set
+
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -25,8 +28,15 @@ class FloatingService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        isRunning = true
         createChannels()
         initFloating()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        isRunning = false
+        clearFloating()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -36,6 +46,10 @@ class FloatingService : Service() {
     }
 
     private fun initFloating() {
+        // TODO
+    }
+
+    private fun clearFloating() {
         // TODO
     }
 
