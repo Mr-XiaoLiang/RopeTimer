@@ -29,10 +29,8 @@ object PermissionHelper {
         private val contractImpl = ActivityResultContracts.RequestMultiplePermissions()
 
         override fun createIntent(context: Context, input: Array<Permission>): Intent {
-            // 获取当前版本需要请求的权限，如果高于了当前版本，那么说明不需要请求
-            val permissions = Permission.currentSdkPermissions()
             // 将枚举转换为字符串
-            val inputValue = permissions.map { it.key }.toTypedArray()
+            val inputValue = input.map { it.key }.toTypedArray()
             // 套壳让系统去请求
             return contractImpl.createIntent(
                 context,
@@ -88,12 +86,17 @@ enum class Permission(
         Build.VERSION_CODES.M
     );
 
+    val needRequest: Boolean
+        get() {
+            return sdk >= Build.VERSION.SDK_INT
+        }
+
     fun isGranted(requestResult: Map<String, Boolean>): Boolean {
         return requestResult[this.key] == true
     }
 
     fun isGranted(context: Context): Boolean {
-        if (this.sdk < Build.VERSION.SDK_INT) {
+        if (!needRequest) {
             return true
         }
         return ActivityCompat.checkSelfPermission(
@@ -108,14 +111,6 @@ enum class Permission(
             return values().find { it.key == key }
         }
 
-        fun currentSdkPermissions(): List<Permission> {
-            val currentSdk = Build.VERSION.SDK_INT
-            return values().filter { it.sdk >= currentSdk }
-        }
-
-        fun needRequestPermissions(context: Context): List<Permission> {
-            return values().filter { !it.isGranted(context) }
-        }
     }
 
 }
