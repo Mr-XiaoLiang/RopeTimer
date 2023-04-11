@@ -14,10 +14,9 @@ import com.lollipop.ropetimer.utils.PermissionHelper
 
 class MainActivity : AppCompatActivity() {
 
-    private val permissionLauncher = PermissionHelper.register(
-        this,
-        ::onRequestPermissionsResult
-    )
+    private val permissionLauncher = PermissionHelper.register(this) {
+        updateStatus()
+    }
 
     private val binding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
@@ -36,7 +35,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onPermissionClick(permission: Permission) {
-        permissionLauncher.launch(arrayOf(permission))
+        permissionLauncher.launch(permission)
     }
 
     override fun onResume() {
@@ -49,30 +48,18 @@ class MainActivity : AppCompatActivity() {
         adapter.notifyDataSetChanged()
     }
 
-    private fun onRequestPermissionsResult(
-        result: PermissionHelper.Result
-    ) {
-        result.forEach { permission, _ ->
-            adapter.onPermissionChanged(permission)
-        }
-    }
-
     private class Adapter(
         private val onItemClickListener: (Permission) -> Unit
     ) : RecyclerView.Adapter<PermissionStatusHolder>() {
 
-        private val data = Permission.values()
+        private val data = listOf(Permission.FloatingWindow, Permission.Notifications)
 
         private var layoutInflater: LayoutInflater? = null
-
-        fun onPermissionChanged(permission: Permission) {
-            notifyItemChanged(data.indexOf(permission))
-        }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PermissionStatusHolder {
             val inflater = layoutInflater ?: LayoutInflater.from(parent.context)
             return PermissionStatusHolder(
-                ItemPermissionStatusBinding.inflate(inflater),
+                ItemPermissionStatusBinding.inflate(inflater, parent, false),
                 ::onItemClick
             )
         }
