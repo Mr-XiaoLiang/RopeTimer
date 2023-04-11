@@ -21,25 +21,41 @@ object PermissionHelper {
 
     fun register(
         activity: AppCompatActivity,
-        result: ActivityResultCallback<Unit>
+        result: OnResultCallback
     ): ActivityResultLauncher<Permission> {
-        return activity.registerForActivityResult(ResultContract(), result)
+        return activity.registerForActivityResult(ResultContract(), ResultCallbackWrapper(result))
     }
 
-    private class ResultContract : ActivityResultContract<Permission, Unit>() {
+    private class ResultContract : ActivityResultContract<Permission, String>() {
 
         override fun createIntent(context: Context, input: Permission): Intent {
             return input.request(context)
         }
 
-        override fun parseResult(resultCode: Int, intent: Intent?) {
+        override fun parseResult(resultCode: Int, intent: Intent?): String {
+            return ""
         }
 
     }
 
+    private class ResultCallbackWrapper(
+        private val callback: OnResultCallback
+    ) : ActivityResultCallback<String> {
+
+        override fun onActivityResult(result: String) {
+            callback.onResult()
+        }
+
+    }
+
+
+    fun interface OnResultCallback {
+        fun onResult()
+    }
+
 }
 
-sealed class Permission(
+abstract class Permission(
     val label: Int,
     val description: Int,
     val sdk: Int,
