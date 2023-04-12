@@ -4,8 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:animateLayoutChanges="true"
     android:background="@color/black"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
     <LinearLayout
@@ -49,6 +50,7 @@
         android:id="@+id/planBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
         android:orientation="horizontal"
         android:paddingHorizontal="16dp"
         android:paddingVertical="16dp">
@@ -56,25 +58,25 @@
         <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
             android:id="@+id/planManagerButton"
             android:layout_width="0px"
-            android:layout_weight="1"
-            app:icon="@drawable/ic_baseline_donut_large_24"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
+            android:layout_weight="1"
             android:gravity="center"
             android:text="@string/plan_manager"
+            app:icon="@drawable/ic_baseline_donut_large_24"
             app:iconGravity="textStart" />
 
         <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
             android:id="@+id/planAddButton"
             android:layout_width="0px"
-            android:layout_weight="1"
-            android:layout_marginStart="16dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
             android:gravity="center"
-            app:icon="@drawable/ic_baseline_add_24"
             android:text="@string/plan_add"
             android:visibility="gone"
+            app:icon="@drawable/ic_baseline_add_24"
             app:iconGravity="textStart"
             tools:visibility="visible" />
 

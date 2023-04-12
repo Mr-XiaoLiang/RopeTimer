@@ -3,23 +3,19 @@ package com.lollipop.ropetimer
 import android.Manifest
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.app.Service
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.os.IBinder
+import androidx.activity.ComponentActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleService
+import com.lollipop.ropetimer.utils.BroadcastBus
+import com.lollipop.ropetimer.utils.broadcastBus
+import com.lollipop.ropetimer.utils.sendEvent
 
-class FloatingService : Service() {
+class FloatingService : LifecycleService() {
 
     companion object {
         private const val FLOATING_CHANNEL_ID = "Floating"
@@ -31,33 +27,14 @@ class FloatingService : Service() {
 
         private const val ACTION_CLOSE = "com.lollipop.ropetimer.FloatingService.CLOSE"
         private const val ACTION_QUICK = "com.lollipop.ropetimer.FloatingService.QUICK"
-        private const val ACTION_FLOATING_CHANGED =
-            "com.lollipop.ropetimer.FloatingService.FLOATING"
+        private const val ACTION_FLOATING = "com.lollipop.ropetimer.FloatingService.FLOATING"
 
         @JvmStatic
         fun onServiceChanged(
-            context: Context,
-            lifecycle: Lifecycle,
-            callback: (context: Context?, intent: Intent?) -> Unit
-        ) {
-            val receiver = object : BroadcastReceiver() {
-                override fun onReceive(context: Context?, intent: Intent?) {
-                    callback(context, intent)
-                }
-            }
-            lifecycle.addObserver(object : LifecycleEventObserver {
-                override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
-                    if (event == Lifecycle.Event.ON_DESTROY) {
-                        context.unregisterReceiver(receiver)
-                    }
-                }
-            })
-            ContextCompat.registerReceiver(
-                context,
-                receiver,
-                IntentFilter(ACTION_FLOATING_CHANGED),
-                ContextCompat.RECEIVER_NOT_EXPORTED
-            )
+            context: ComponentActivity,
+            callback: BroadcastBus.Callback
+        ): BroadcastBus {
+            return context.broadcastBus(ACTION_FLOATING, callback)
         }
 
         var isRunning: Boolean = false
@@ -65,40 +42,43 @@ class FloatingService : Service() {
 
     }
 
-    private val closeBroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            // TODO("Not yet implemented")
-        }
+    private val closeBroadcastReceiver = BroadcastBus.register(
+        this, this.lifecycle, arrayOf(ACTION_CLOSE)
+    ) { _, _ ->
+        stopSelf()
     }
 
-    private val quickBroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            // TODO("Not yet implemented")
-        }
-    }
-
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
+    private val quickBroadcastReceiver = BroadcastBus.register(
+        this, this.lifecycle, arrayOf(ACTION_QUICK)
+    ) { _, _ ->
+        quickAdd()
     }
 
     override fun onCreate() {
         super.onCreate()
         isRunning = true
-
         createChannels()
         initFloating()
+        sendEvent(ACTION_FLOATING)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         isRunning = false
         clearFloating()
+        NotificationManagerCompat.from(this).cancel(FLOATING_NOTIFICATION_ID)
+        sendEvent(ACTION_FLOATING)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
         updateNotification()
         onStartCommand(intent)
         return START_STICKY_COMPATIBILITY
+    }
+
+    private fun quickAdd() {
+        // TODO
     }
 
     private fun initFloating() {
@@ -184,7 +164,7 @@ class FloatingService : Service() {
     private fun getAddIntent(): PendingIntent {
         return PendingIntent.getBroadcast(
             this,
-            PENDING_INTENT_REQUEST_CLOSE,
+            PENDING_INTENT_REQUEST_ADD,
             Intent(ACTION_QUICK),
             PendingIntent.FLAG_UPDATE_CURRENT
         )

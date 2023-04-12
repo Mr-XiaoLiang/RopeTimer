@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lollipop.ropetimer.databinding.ActivityMainBinding
@@ -31,6 +32,15 @@ class MainActivity : AppCompatActivity() {
 
     private var isFloatingWindowGranted = false
 
+    /**
+     * 服务观察者
+     * 它只会在前台的时候才会启动观察，因为在Resume的时候会整体进行一次更新内容
+     * 并且在后台时更新UI存在隐患
+     */
+    private val serviceObserver = FloatingService.onServiceChanged(this) { _, _ ->
+        updatePlanAddButton()
+    }.activeBy(Lifecycle.State.RESUMED)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowInsetsHelper.initWindowFlag(this)
         super.onCreate(savedInstanceState)
@@ -48,9 +58,6 @@ class MainActivity : AppCompatActivity() {
         }
         binding.planManagerButton.setOnClickListener {
             // TODO
-        }
-        FloatingService.onServiceChanged(this, this.lifecycle) { _, _ ->
-            updatePlanAddButton()
         }
     }
 
