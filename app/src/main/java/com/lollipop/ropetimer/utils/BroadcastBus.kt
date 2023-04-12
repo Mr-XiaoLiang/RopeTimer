@@ -11,11 +11,18 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import java.lang.ref.WeakReference
 
+/**
+ * 基于广播组件只做的事件总线
+ * 它能帮我们做一些跨进程的广播
+ * 为了安全性考虑
+ * 广播的事件总线必须关联生命周期
+ * 这样才能在必要的时候去掉广播的注册
+ */
 class BroadcastBus private constructor(
     context: Context,
     lifecycle: Lifecycle,
     private val intentFilter: IntentFilter,
-    private val callback: Callback
+    private var callback: Callback
 ) : BroadcastReceiver(), LifecycleEventObserver {
 
     companion object {
@@ -40,6 +47,8 @@ class BroadcastBus private constructor(
         }
 
     }
+
+    private var receiverType = ReceiverType.NOT_EXPORTED
 
     /**
      * 活跃状态的生命周期
@@ -79,6 +88,10 @@ class BroadcastBus private constructor(
         autoRegister()
     }
 
+    /**
+     * 设置活跃的生命周期
+     * 自动注册功能将保证广播的注册仅保持在活跃的生命周期内
+     */
     fun activeBy(state: Lifecycle.State): BroadcastBus {
         activeLifecycleState = state
         autoRegister()
@@ -89,11 +102,30 @@ class BroadcastBus private constructor(
      * 销毁，它会移除所有引用，将无法再添加监听
      */
     fun destroy() {
+        // 锁定监听状态
         userRegister = false
-        lifecycleReference.get()?.removeObserver(this)
-        contextReference.get()?.unregisterReceiver(this)
+        tryDo {
+            // 移除生命周期监听
+            lifecycleReference.get()?.removeObserver(this)
+        }
+        tryDo {
+            // 移除广播注册
+            contextReference.get()?.unregisterReceiver(this)
+        }
+        // 移除生命周期的引用
         lifecycleReference.clear()
+        // 移除上下文的引用
         contextReference.clear()
+        // 移除回调函数的引用
+        callback = EmptyCallback()
+    }
+
+    private inline fun tryDo(callback: () -> Unit) {
+        try {
+            callback()
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -107,11 +139,27 @@ class BroadcastBus private constructor(
     }
 
     /**
-     * 手动解除注册，再再次手动注册之前，将不会自动根据生命周期注册
+     * 手动解除注册，在再次手动注册之前，将不会自动根据生命周期注册
      */
     fun unregister(): BroadcastBus {
         userRegister = false
         autoRegister()
+        return this
+    }
+
+    /**
+     * 更新注册类型
+     * 对于可能跨应用的外部广播，可能需要它来调整模式
+     * 默认为 NOT_EXPORTED
+     */
+    fun changeReceiverType(type: ReceiverType, updateNow: Boolean = true): BroadcastBus {
+        if (receiverType != type) {
+            receiverType = type
+            if (updateNow) {
+                unregister()
+                register()
+            }
+        }
         return this
     }
 
@@ -127,7 +175,7 @@ class BroadcastBus private constructor(
                     context,
                     this,
                     intentFilter,
-                    ContextCompat.RECEIVER_NOT_EXPORTED
+                    receiverType.key
                 )
                 isRegister = true
             } else {
@@ -156,9 +204,33 @@ class BroadcastBus private constructor(
         }
     }
 
+    private class EmptyCallback : Callback {
+        override fun onReceive(context: Context, intent: Intent) {}
+    }
+
     fun interface Callback {
         fun onReceive(context: Context, intent: Intent)
 
+    }
+
+    enum class ReceiverType(val key: Int) {
+
+        /**
+         * Flag for {@link #registerReceiver}: The receiver can receive broadcasts from Instant Apps.
+         */
+        INSTANT_APPS(ContextCompat.RECEIVER_VISIBLE_TO_INSTANT_APPS),
+
+        /**
+         * Flag for [.registerReceiver]: The receiver can receive broadcasts from other Apps.
+         * Has the same behavior as marking a statically registered receiver with "exported=true"
+         */
+        EXPORTED(ContextCompat.RECEIVER_EXPORTED),
+
+        /**
+         * Flag for [.registerReceiver]: The receiver cannot receive broadcasts from other Apps.
+         * Has the same behavior as marking a statically registered receiver with "exported=false"
+         */
+        NOT_EXPORTED(ContextCompat.RECEIVER_NOT_EXPORTED)
     }
 
 }
