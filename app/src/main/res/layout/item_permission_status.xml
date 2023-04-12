@@ -43,4 +43,12 @@
         app:layout_constraintStart_toStartOf="@id/nameView"
         app:layout_constraintTop_toBottomOf="@id/nameView" />
 
+    <View
+        android:layout_width="0px"
+        android:layout_height="1dp"
+        android:background="#666"
+        app:layout_constraintStart_toStartOf="@id/nameView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

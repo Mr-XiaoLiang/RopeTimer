@@ -1,16 +1,21 @@
 package com.lollipop.ropetimer
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lollipop.ropetimer.databinding.ActivityMainBinding
 import com.lollipop.ropetimer.databinding.ItemPermissionStatusBinding
 import com.lollipop.ropetimer.utils.Permission
 import com.lollipop.ropetimer.utils.PermissionHelper
+import com.lollipop.ropetimer.utils.insets.WindowInsetsEdge
+import com.lollipop.ropetimer.utils.insets.WindowInsetsHelper
+import com.lollipop.ropetimer.utils.insets.fixInsetsByPadding
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,14 +29,29 @@ class MainActivity : AppCompatActivity() {
 
     private val adapter = Adapter(::onPermissionClick)
 
+    private var isFloatingWindowGranted = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        WindowInsetsHelper.initWindowFlag(this)
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        binding.root.fixInsetsByPadding(WindowInsetsEdge.ALL)
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = LinearLayoutManager(
             this, RecyclerView.VERTICAL, false
         )
-
+        binding.startButton.setOnClickListener {
+            startService(Intent(this, FloatingService::class.java))
+        }
+        binding.planAddButton.setOnClickListener {
+            // TODO
+        }
+        binding.planManagerButton.setOnClickListener {
+            // TODO
+        }
+        FloatingService.onServiceChanged(this, this.lifecycle) { _, _ ->
+            updatePlanAddButton()
+        }
     }
 
     private fun onPermissionClick(permission: Permission) {
@@ -41,6 +61,14 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updateStatus()
+        val granted = Permission.FloatingWindow.isGranted(this)
+        isFloatingWindowGranted = granted
+        binding.startButton.isVisible = granted
+        updatePlanAddButton()
+    }
+
+    private fun updatePlanAddButton() {
+        binding.planAddButton.isVisible = isFloatingWindowGranted && FloatingService.isRunning
     }
 
     @SuppressLint("NotifyDataSetChanged")

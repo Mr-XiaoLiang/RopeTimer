@@ -7,7 +7,10 @@
     <string name="description_post_notifications">保持服务运行与通知栏快速操作</string>
     <string name="label_floating_window">悬浮窗口</string>
     <string name="description_floating_window">在其他应用上显示窗口</string>
-    <string name="authorized">授权</string>
     <string name="start">开始</string>
     <string name="stop">停止</string>
+    <string name="home">主页</string>
+    <string name="service_running">服务正在运行</string>
+    <string name="plan_manager">预设管理</string>
+    <string name="plan_add">添加</string>
 </resources>
