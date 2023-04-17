@@ -16,16 +16,6 @@ import java.lang.ref.WeakReference
 
 abstract class ProtocolManager : FileInfoManager() {
 
-    companion object {
-
-        private var executorCount = 0
-
-        fun getExecutorName(): String {
-            executorCount++
-            return "Executor$executorCount"
-        }
-    }
-
     protected abstract val protocolDirName: String
 
     protected var protocolDir: File = File("")
