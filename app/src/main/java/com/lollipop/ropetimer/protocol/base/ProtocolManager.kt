@@ -1,6 +1,8 @@
 package com.lollipop.ropetimer.protocol.base
 
 import android.content.Context
+import android.graphics.Color
+import androidx.annotation.ColorInt
 import com.lollipop.ropetimer.BuildConfig
 import com.lollipop.ropetimer.protocol.Cover
 import com.lollipop.ropetimer.protocol.FileCover
@@ -15,6 +17,44 @@ import java.io.File
 import java.lang.ref.WeakReference
 
 abstract class ProtocolManager : FileInfoManager() {
+
+    companion object {
+        const val COVER_VALUE = "VALUE"
+        const val COVER_TYPE = "TYPE"
+
+        fun colorToString(@ColorInt color: Int): String {
+            val str = color.toString(16).uppercase().fixColorLength(8)
+            return "#$str"
+        }
+
+        fun parseColor(color: String): Int? {
+            try {
+                return Color.parseColor(color)
+            } catch (e: Throwable) {
+                e.printStackTrace()
+            }
+            return null
+        }
+
+        private fun String.fixColorLength(min: Int): String {
+            val defValue = "0"
+            val str = this
+            if (min < 1) {
+                return str
+            }
+            if (str.length >= min) {
+                return str
+            }
+            if (str.length == min - 1) {
+                return defValue + str
+            }
+            val builder = StringBuilder(str)
+            while (builder.length < min) {
+                builder.insert(0, defValue)
+            }
+            return builder.toString()
+        }
+    }
 
     protected abstract val protocolDirName: String
 
@@ -79,12 +119,23 @@ abstract class ProtocolManager : FileInfoManager() {
         }
         doAsync({ onUI { callback(JSONObject()) } }) {
             readObjectFromFile(
-                File(protocolDir, name), {
+                getProtocolFile(name, false),
+                {
                     onUI { callback(JSONObject()) }
-                }) {
+                }
+            ) {
                 onUI { callback(it) }
             }
         }
+    }
+
+    protected fun getProtocolFile(fileName: String, filter: Boolean = true): File {
+        val name = if (filter) {
+            fileName.fileNameFilter()
+        } else {
+            fileName
+        }
+        return File(protocolDir, name)
     }
 
     protected fun saveInfo(fileName: String, info: JSONObject) {
@@ -100,7 +151,7 @@ abstract class ProtocolManager : FileInfoManager() {
             return
         }
         doAsync {
-            writeToFile(info, File(protocolDir, name))
+            writeToFile(info, getProtocolFile(name, false))
         }
     }
 
@@ -127,12 +178,12 @@ abstract class ProtocolManager : FileInfoManager() {
 
     protected fun JSONObject.toCover(context: Context): Cover? {
         val json = this
-        val typeKey = json.optString(Keys.Cover.TYPE)
+        val typeKey = json.optString(COVER_TYPE)
         if (typeKey.isEmpty()) {
             return null
         }
         val type = CoverType.find(typeKey) ?: return null
-        val value = json.optString(Keys.Cover.VALUE) ?: return null
+        val value = json.optString(COVER_VALUE) ?: return null
         if (value.isEmpty()) {
             return null
         }
@@ -148,17 +199,7 @@ abstract class ProtocolManager : FileInfoManager() {
     }
 
     private fun getCoverJson(value: String, type: CoverType): JSONObject {
-        return JSONObject().put(Keys.Cover.VALUE, value).put(Keys.Cover.TYPE, type.key)
-    }
-
-    private sealed class Keys {
-        object Cover : Keys() {
-
-            const val TAG = "COVER"
-            const val VALUE = "VALUE"
-            const val TYPE = "TYPE"
-
-        }
+        return JSONObject().put(COVER_VALUE, value).put(COVER_TYPE, type.key)
     }
 
     private enum class CoverType(val key: String) {
