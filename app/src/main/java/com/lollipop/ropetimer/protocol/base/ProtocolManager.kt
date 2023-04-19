@@ -129,7 +129,7 @@ abstract class ProtocolManager : FileInfoManager() {
         }
     }
 
-    protected fun getProtocolFile(fileName: String, filter: Boolean = true): File {
+    fun getProtocolFile(fileName: String, filter: Boolean = true): File {
         val name = if (filter) {
             fileName.fileNameFilter()
         } else {

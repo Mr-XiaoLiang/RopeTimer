@@ -13,10 +13,10 @@
         android:theme="@style/Theme.RopeTimer"
         tools:targetApi="31">
         <activity
-            android:name=".ProtocolEditActivity"
+            android:name=".NormalProtocolEditActivity"
             android:exported="false" />
         <activity
-            android:name=".ProtocolManagerActivity"
+            android:name=".NormalProtocolManagerActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
